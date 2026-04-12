@@ -1,3 +1,5 @@
+# Data used in the project
+
 This project uses the public Complete EEG dataset hosted on Kaggle.
 
 Source:
