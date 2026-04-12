@@ -6,7 +6,7 @@ URL: https://www.kaggle.com/datasets/amananandrai/complete-eeg-dataset
 
 How to use:
 
-1.Download the dataset manually from the Kaggle page above.
+1.Download the dataset manually from the Kaggle page above.	
 2.Extract the files.
 3.Place the EEG CSV files inside data/raw/.
 
