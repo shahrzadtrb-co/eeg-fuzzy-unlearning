@@ -9,3 +9,11 @@ Thumbs.db
 
 data/raw/
 data/processed/
+
+# Generated outputs (the reference results in results/reference_run.json are tracked)
+results/*
+!results/reference_run.json
+*.egg-info/
+build/
+.pytest_cache/
+.ruff_cache/

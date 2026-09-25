@@ -1,0 +1,43 @@
+{
+  "source": "notebooks/eeg_fuzzy_unlearning.ipynb (executed on the Kaggle Complete EEG dataset, 36 subjects); same numbers as paper/Final_Report_EEG_Unlearning_Torabi.pdf",
+  "subject_to_forget": 14,
+  "seed": 42,
+  "n_train_retain": 1085,
+  "n_train_forget": 31,
+  "n_test_retain": 175,
+  "n_test_forget": 5,
+  "baseline": {
+    "accuracy": 0.8971,
+    "macro_f1": 0.8712,
+    "forget_hit_rate": 1.0,
+    "forget_max_confidence": 0.3064,
+    "forget_entropy": 2.9044,
+    "oob_score": 0.9301,
+    "train_accuracy": 0.9919
+  },
+  "exact": {
+    "accuracy": 0.9029,
+    "macro_f1": 0.8998,
+    "forget_hit_rate": 0.0,
+    "forget_max_confidence": 0.1106,
+    "forget_entropy": 3.265,
+    "oob_score": 0.9382,
+    "train_accuracy": 0.9899
+  },
+  "fuzzy": {
+    "accuracy": 0.88,
+    "macro_f1": 0.8719,
+    "forget_hit_rate": 0.0,
+    "forget_max_confidence": 0.1208,
+    "forget_entropy": 3.2357,
+    "oob_score": 0.8866,
+    "train_accuracy": 0.9751,
+    "weight_min": 0.2501,
+    "weight_mean": 0.4309,
+    "weight_max": 1.0
+  },
+  "fuzzy_vs_exact": {
+    "retain": {"prediction_agreement": 0.8914, "mean_abs_proba_diff": 0.008499},
+    "forget": {"prediction_agreement": 1.0, "mean_abs_proba_diff": 0.010355}
+  }
+}
