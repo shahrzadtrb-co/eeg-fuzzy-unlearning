@@ -1,51 +1,77 @@
 # Privacy-Preserving EEG Classification with Fuzzy Unlearning
 
-This project presents an end-to-end EEG subject-level unlearning pipeline using a public EEG dataset from Kaggle. It compares three settings: baseline training, exact retraining after subject removal, and fuzzy unlearning through similarity-based sample weighting.
+Can a trained EEG classifier "forget" one person? EEG signals carry subject-specific patterns that can identify individuals, and under the GDPR a person can ask for their data to be deleted, including its influence on a model that is already in use.
 
-## Project goal
+This project builds an end-to-end subject-level unlearning pipeline and compares three settings:
 
-EEG signals can contain subject-specific patterns that make them privacy-sensitive. This project studies whether the influence of one selected subject can be reduced in a trained model while preserving classification utility for the remaining subjects.
+- **Baseline:** Random Forest trained on all subjects
+- **Exact unlearning:** retrained from scratch without the forgotten subject (the reference for true removal)
+- **Fuzzy unlearning:** retrained with lower sample weights for the retained windows most similar to the forgotten subject
 
-## What this project does
+Written for the Real Life Security Seminar, University of Passau, December 2025. The full report is in [`paper/`](paper/Final_Report_EEG_Unlearning_Torabi.pdf).
 
-The notebook performs the following steps:
+## Results
 
-1. Loads multi-subject EEG recordings from CSV files
-2. Assigns the 19 standard EEG channel names
-3. Splits each subject recording into train and test portions
-4. Segments the signals into sliding windows
-5. Extracts statistical and spectral features from each window
-6. Builds retain and forget datasets
-7. Trains a baseline Random Forest classifier
-8. Trains an exact unlearning model by removing the forgotten subject
-9. Trains a fuzzy unlearning model using similarity-based sample weighting
-10. Compares the models in terms of retained-subject utility and forgotten-subject uncertainty
+Retained subjects (test set):
+
+| Model | Accuracy | Macro F1 |
+|---|---|---|
+| Baseline | 0.8971 | 0.8712 |
+| Exact unlearning | 0.9029 | 0.8998 |
+| Fuzzy unlearning | 0.8800 | 0.8719 |
+
+Forgotten subject (test windows). Lower confidence and higher entropy mean the model has forgotten more:
+
+| Model | Mean max. confidence | Predictive entropy |
+|---|---|---|
+| Baseline | 0.3064 | 2.9003 |
+| Exact unlearning | 0.1106 | 3.2650 |
+| Fuzzy unlearning | 0.1208 | 3.2357 |
+
+**What this shows:** exact retraining gives the best balance of forgetting and utility. Fuzzy unlearning moves the model strongly in the same direction, with a small loss in retained accuracy. Forgetting cannot be judged by accuracy alone, because the forgotten subject is no longer a class, so it is measured through confidence and entropy instead.
+
+## Limitations
+
+- **Small forget set.** The forgotten subject contributes 31 training windows and only 5 test windows, so the forgetting numbers are indicative, not conclusive.
+- **Correlated samples.** Overlapping sliding windows make neighbouring training samples highly similar. Training accuracy is about 0.99 for all models, a sign of overfitting.
+- **Fuzzy unlearning still retrains.** In this implementation it re-weights the retained data and retrains, so it does not yet save compute compared with exact retraining.
+- **Scarce data.** Public EEG datasets suited to subject-level unlearning are rare, which limits how far the results generalise.
+
+## Pipeline
+
+1. Load 36 subject recordings (19 EEG channels, mental-arithmetic task) from CSV
+2. Split each recording chronologically, 80% train and 20% test, so test windows are always later, unseen segments
+3. Segment into sliding windows: overlapping for training, non-overlapping for testing
+4. Extract five statistical features per channel, plus band power in the delta, theta, alpha, beta and gamma bands
+5. Build the retain set and the forget set for the selected subject
+6. Train the baseline, exact and fuzzy Random Forest models
+7. Evaluate retained-subject accuracy and macro F1, and forgotten-subject confidence and entropy
+
+**Tech:** Python · scikit-learn (Random Forest) · Jupyter
 
 ## Dataset
 
-This project uses the public Complete EEG dataset hosted on Kaggle.
-
-Source:  
-Aman Anand, Complete EEG dataset, Kaggle  
+Complete EEG dataset by Aman Anand, hosted on Kaggle:
 https://www.kaggle.com/datasets/amananandrai/complete-eeg-dataset
 
-The raw dataset files are not included in this repository. To run the notebook:
+This repository does not include the raw files.
 
-1. Download the dataset manually from the Kaggle page
-2. Extract the files
-3. Place the EEG CSV files inside `data/raw/`
+## How to run
+
+1. Download the dataset from Kaggle and extract it
+2. Create the folder `data/raw/` and place the EEG CSV files there
+3. Open `notebooks/eeg_fuzzy_unlearning.ipynb` and run all cells
 
 ## Repository structure
 
 ```text
 eeg-fuzzy-unlearning/
-├── .gitignore
 ├── README.md
-├── notebook/
+├── .gitignore
+├── notebooks/
 │   └── eeg_fuzzy_unlearning.ipynb
 ├── paper/
 │   └── Final_Report_EEG_Unlearning_Torabi.pdf
-├── data/
-│   ├── README.md
-│   └── raw/
-└── figures/
+└── data/
+    └── README.md        (download instructions; put the raw CSVs in data/raw/)
+```
